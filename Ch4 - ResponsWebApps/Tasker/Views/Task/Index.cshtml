@@ -1,0 +1,120 @@
+﻿@model IEnumerable<Tasker.Models.Task>
+@{
+    ViewBag.Title = "Index";
+
+    var iTaskCount = 0;
+    iTaskCount = Model.Count();
+}
+
+@if (iTaskCount > 1)
+{
+    <h2>You have @iTaskCount Tasks</h2>
+}
+else if (iTaskCount > 0)
+{
+    <h2>You only have @iTaskCount Task</h2>
+}
+else
+{
+    <h2>You have no Tasks</h2>
+}
+
+<button type="button" class="btn btn-primary" id="btn-order-default">Original</button>
+<button type="button" class="btn btn-danger" id="btn-order-name">Critical Tasks</button>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 task-pipeline-heading"><h2>Pipeline</h2></div>
+        <div class="col-md-4 task-in-progress-heading"><h2>In progress</h2></div>
+        <div class="col-md-4 task-completed-heading"><h2>Completed</h2></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 task-pipeline">
+            @{ var iCount = 0; }
+            @foreach (var item in Model)
+            {
+                iCount += 1;
+                <div class="task @(item.DueDate <= DateTime.Now.AddDays(1) ? "critical" : "")">
+                    <div class="task-id">
+                        @item.TaskID
+                    </div>
+                    <div class="task-title">
+                        @item.TaskTitle
+                    </div>
+                    <div class="task-body">
+                        @item.TaskBody
+                    </div>
+                    <div class="task-date">
+                        @item.DueDate.ToString("MMMM dd, yyyy")
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="chkCompleted@(iCount)">
+                        <label class="form-check-label" 
+                               for="chkCompleted@(iCount)" 
+                               id="chkLabel@(iCount)">
+                        Mark completed
+                        </label>
+                    </div>
+
+                </div>
+            }
+        </div>
+        <div class="col-md-4 task-in-progress" id="inprogress">
+        </div>
+        <div class="col-md-4 task-completed">
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        var $grid;
+
+        $(function () {
+            $(".task").draggable();
+
+            $grid = $('.task-pipeline').isotope({
+                // options
+                itemSelector: '.task'
+            });
+
+            $("#btn-order-default").click(function () {
+                $grid = $grid.isotope({ filter: '*' });
+            });
+
+            $("#btn-order-name").click(function () {
+                $grid = $grid.isotope({ filter: '.critical' });
+            });
+
+            
+
+            $('[id^="chkCompleted"]').click(function () {
+                var $div = $(this).closest('div[class^="task"]');
+                //var $div = $(this).closest('div');
+
+                if (this.checked) {                   
+
+                    $("label[for='" + this.id + "']")["0"]
+                        .innerText = "Completed";
+                    $div.css("background-color","#89ea31");
+                }
+                else {
+                    $("label[for='" + this.id + "']")["0"]
+                        .innerText = "Mark completed";
+                    $div.css("background-color","transparent");
+                }
+            });
+        });
+    </script>
+}
+
+
+
+
